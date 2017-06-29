@@ -1,0 +1,6 @@
+## Interface: 70200
+## Title: PickleSpammer
+## Author: SniffinPickles
+## SavedVariables: LFGDump
+## SavedVariablesPerCharacter: WhisperedApps
+code.lua
