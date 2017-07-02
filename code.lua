@@ -1,17 +1,22 @@
-local version = "PickleSpammer\nv1.5.3"
+local version = "PickleSpammer\nv1.5.5"
 
  WhisperedApps = {}
 
-local IsRandom = true;
+where = GetRandomArgument(
+"2");
+-- put your ids for "where" here
+
+
+local IsRandom = false;
 --  set this to false if you want to randomly select PVP things
 
-local pve = true;
-local pvp = true;
+local pve = false;
+local pvp = false;
 
 -- this setting is to do PVP or PVE queues (all Legion raids/dungeons) or ALL pvp settings (randomly)
 -- if you set both to true, it will do both.
 
-local luaunlocked = false;
+local luaunlocked = true;
 -- set this to TRUE if you're using this tool
 -- also this will include an anti-afk mechanism if set true
 -- http://www.ownedcore.com/forums/world-of-warcraft/world-of-warcraft-bots-programs/503852-no-memory-write-lua-unlocker-anti-afk.html
@@ -19,35 +24,31 @@ local luaunlocked = false;
 local WhisperSetting = true;
 --  set this to false if you don't want to whisper players
 
-local whispermessage = "This is the message you send to users.  We can build an array of random messages too one day";
+local whispermessage = "3";
+
+
+local timedur = 10;
+
+--  Set this to how many seconds to sit in queue.
 
 
 --  You can have unlimited titles (obviously, just match the pattern of array)
 --  Title: has a maximum of 41 characters (including spaces)
 title2 = GetRandomArgument(
-"title1 - 40 character max",
-"title2 - 40 character max",
-"title3 - 40 character max",
-"title4 - 40 character max",
-"title5 - 40 character max",
-"title6 - 40 character max");
+"1");
 
 
 --  You can have unlimited titles (obviously, just match the pattern of array)
 --  Maximum of about 150 characters (haven't checked)
 desc = GetRandomArgument(
-"This is a test description 1",
-"This is a test description 2",
-"This is a test description 3");
-
+"2");
 
 
 
 
 -- 1.  Creating the Spam
  --  What we need to get started:
- --  /run spam(dur,where) 
- --  dur = seconds to run group
+ --  /run spam(where) 
  --  where = the activity ID (you can see it down below in more comments)
 
 -- 2.  Creating your Titles/Description
@@ -91,7 +92,7 @@ function whisperapps(msg)
 local applicants = C_LFGList.GetApplicants(); -- get applicant table
 
 if(applicants == nil)then
-	local applicants = {5};
+	local applicants = 5;
 end
  -- ^ the above if statement is just to break loops if needed
 
@@ -115,16 +116,6 @@ for i=1, #applicants do      -- loop through them
 end
 -- end whipser function
 
-function wrepeat(dur)
-
-C_Timer.After(5, function()
-	C_LFGList.RemoveListing()
-		whisperapps(whispermessage);
-		--print("5 Seconds Passed - I whispered applicants - edit line 120/147 if you want to do it faster");
-		wrepeat(5);
-	end)
-end
-
 
 
 local frame = CreateFrame("FRAME", "PicklesSpammer");
@@ -134,9 +125,30 @@ local function eventHandler(self, event, ...)
 end
 frame:SetScript("OnEvent", eventHandler);
 
+-- ^  Creates whisper loop
 
 
-function spam(dur,where)
+local leaveframe = CreateFrame("FRAME", "PicklesSpammer");
+leaveframe:RegisterEvent("GROUP_LEFT");
+local function eventHandler(self, event, ...)
+ 				C_Timer.After(1, function()
+						print("requeued")
+						spam(where)
+						--JumpOrAscendStart();
+					end)
+end
+leaveframe:SetScript("OnEvent", eventHandler);
+
+-- ^  Creates requeue loop
+
+
+SLASH_SPAM1 = "/spam"
+SlashCmdList["SPAM"] = function(msg)
+spam(where);
+end
+
+function spam(where)
+
 
 
 if(IsRandom == true)then
@@ -150,33 +162,21 @@ if(IsRandom == true)then
   end 
 end
 
-C_Timer.After(5, function()
-	C_LFGList.RemoveListing()
-		if(WhisperSetting == true)then
-		whisperapps(whispermessage);
-		--print("5 Seconds Passed - I whispered applicants - edit line 120/147 if you want to do it faster");
-		wrepeat(5);
-	else
-		print("whispering apps setting turned off");
-		end
-	end)
-
-
 
 
 C_LFGList.CreateListing(where,title2,0,0,"",desc,false)
 
-C_Timer.After(dur, function()
+
+
+C_Timer.After(timedur, function()
 	C_LFGList.RemoveListing()
 	LeaveParty()
 		print("Left Group - Requeue");
-
 		if(luaunlocked == true)then
 				C_Timer.After(3, function()
-					C_LFGList.RemoveListing()
-						print("requeued")
-						spam(dur,where)
-						JumpOrAscendStart();
+						--print("requeued")
+						--spam(dur,where)
+						--JumpOrAscendStart();
 					end)
 			end
 	end)
@@ -667,7 +667,7 @@ end
 -- The Nighthold (Mythic) - 481
 
 
-local ShowPatreon = true;
+local ShowPatreon = false;
 
 -- set to this to fall if you're a patreon user.  please subscribe, it's like only $1/mo to help me
 
